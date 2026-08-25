@@ -23,7 +23,7 @@ local espEnabled, antiRagdollEnabled, infJumpEnabled = false, false, false
 local batCounterEnabled, medusaCounterEnabled = false, false
 local autoTPEnabled, guiTransparencyEnabled = false, false
 local mobileButtonsEnabled, mobileButtonsLocked = true, true
-local mobileButtonsSize = 80
+local mobileButtonsSize = 46
 local uiLocked = false
 local batDesyncTpEnabled = false
 local autoBatSetVisual, autoLeftSetVisual, autoRightSetVisual, batDesyncTpSetVisual = nil, nil, nil, nil
@@ -2469,7 +2469,7 @@ local function resetAllSettings()
     autoLeftEnabled=false;autoRightEnabled=false;autoBatEnabled=false;autoSwingEnabled=true;autoMoveSwingEnabled=false
     autoTPEnabled=false;autoTPHeight=20;antiLagEnabled=false;stretchRezEnabled=false
     Steal.AutoStealEnabled=false;Steal.StealRadius=60;Steal.StealDuration=1.4;SemiSteal.CONFIG.STEAL_RANGE=9;SemiSteal.CONFIG.PRIME_RANGE=80;stealMode="normal"
-    guiTransparencyEnabled=false;mobileButtonsEnabled=true;mobileButtonsLocked=true;_GACC.mobileButtonsGrouped=false;mobileButtonsSize=64
+    guiTransparencyEnabled=false;mobileButtonsEnabled=true;mobileButtonsLocked=true;_GACC.mobileButtonsGrouped=false;mobileButtonsSize=46
     _GACC.mobileButtonPositions={}
     _GACC.mobileGroupPosition={x=.86,y=.5}
     circleButtonsEnabled=false;uiLocked=false;fovValue=80;fovIndex=1
@@ -2777,7 +2777,7 @@ pcall(function()
     if type(d.autoMoveSwingInterval)=="number" then autoMoveSwingInterval=d.autoMoveSwingInterval end
     if type(d.ragdollGui)=="boolean" then ragdollGuiEnabled=d.ragdollGui end
     if type(d.mobileButtonsEnabled)=="boolean" then mobileButtonsEnabled=d.mobileButtonsEnabled end
-    if type(d.mobileButtonsSize)=="number" then mobileButtonsSize=math.clamp(math.floor(d.mobileButtonsSize+.5),44,110) end
+    if type(d.mobileButtonsSize)=="number" then mobileButtonsSize=math.clamp(math.floor(d.mobileButtonsSize+.5),38,110) end
     if type(d.mobileButtonsLocked)=="boolean" then mobileButtonsLocked=d.mobileButtonsLocked end
     if type(d.mobileButtonsGrouped)=="boolean" then _GACC.mobileButtonsGrouped=d.mobileButtonsGrouped end
     if type(d.mobileButtonPositions)=="table" then _GACC.mobileButtonPositions=d.mobileButtonPositions end
@@ -2951,9 +2951,10 @@ local function _buildGuiScope()
 
     local Outer=Instance.new("Frame")
     Outer.Name="Outer"
-    Outer.Size=UDim2.new(0,280,0,560)
+    Outer.AnchorPoint=Vector2.new(1,0)
+    Outer.Size=UDim2.new(0,260,0,520)
     Outer.Visible=true
-    Outer.Position=UDim2.new(0,4,0,126)
+    Outer.Position=UDim2.new(1,-10,0,72)
     Outer.BackgroundTransparency=1; Outer.BorderSizePixel=0; Outer.ClipsDescendants=false; Outer.Parent=GuiHub
     GuiRefs.outer=Outer
 
@@ -2964,7 +2965,7 @@ local function _buildGuiScope()
     local _innerStroke=guiStroke(Inner,Color3.fromRGB(90,95,112),1.5); GuiRefs.inner=Inner
     _innerStroke.Color=Color3.fromRGB(255,100,100)
     _innerStroke.Thickness=1.2
-    local openScale=Instance.new("UIScale",Inner); openScale.Scale=1
+    local openScale=Instance.new("UIScale",Inner); openScale.Scale=0.72
     local cornerL=Instance.new("Frame",Inner)
     cornerL.Size=UDim2.new(0,18,0,2); cornerL.Position=UDim2.new(0,8,1,-9)
     cornerL.BackgroundColor3=_GACC.accentDark; cornerL.BackgroundTransparency=0.25; cornerL.BorderSizePixel=0; cornerL.ZIndex=10; cornerL.Visible=false
@@ -4309,7 +4310,7 @@ local profileLine=Instance.new("Frame",userF)
     local kbPage=CategoryRefs.contents["Keybinds"]
     local setBody=mkSection(kbPage,"INTERFACE",0)
 addInputRow(setBody,"Button Size",mobileButtonsSize,6,function(v)
-        mobileButtonsSize=math.clamp(math.floor(v+.5),44,110)
+        mobileButtonsSize=math.clamp(math.floor(v+.5),38,110)
         if _GACC.refreshMobileSize then _GACC.refreshMobileSize() end
         saveConfig()
     end)
@@ -4351,7 +4352,11 @@ addInputRow(setBody,"Button Size",mobileButtonsSize,6,function(v)
 
     end
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Eclipseduelshubs/antilagsection/refs/heads/main/anti%20lag%20script"))()    
+pcall(function()
+    local src=game:HttpGet("https://raw.githubusercontent.com/Eclipseduelshubs/antilagsection/refs/heads/main/anti%20lag%20script")
+    local fn=loadstring(src)
+    if type(fn)=="function" then fn() end
+end)
     
     UIS.InputBegan:Connect(function(inp,gp)
         if gp and inp.UserInputType~=Enum.UserInputType.Gamepad1 then return end
@@ -4419,12 +4424,14 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/Eclipseduelshubs/anti
 end 
 local _ok,_err=pcall(_buildGuiScope)
 if not _ok then
-    warn("[LEGENDARY HUB] UI error: ", tostring(_err))
+    warn("[LEGENDARY HUB] UI error suppressed: ", tostring(_err))
     pcall(function()
-        local sg=Instance.new("ScreenGui"); sg.Name="LegendaryHubErr"; sg.ResetOnSpawn=false; sg.Parent=game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-        local t=Instance.new("TextLabel",sg); t.Size=UDim2.new(1,0,0,80); t.Position=UDim2.new(0,0,0.4,0)
-        t.BackgroundColor3=Color3.fromRGB(30,0,0); t.TextColor3=Color3.fromRGB(255,80,80)
-        t.Text="LEGENDARY HUB ERROR:\n"..tostring(_err); t.TextSize=14; t.Font=Enum.Font.GothamBold; t.TextWrapped=true
+        local pg=game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
+        local old=pg and pg:FindFirstChild("LegendaryHubErr")
+        if old then old:Destroy() end
+        local cg=game:GetService("CoreGui")
+        local old2=cg and cg:FindFirstChild("LegendaryHubErr")
+        if old2 then old2:Destroy() end
     end)
 end
 
@@ -4472,14 +4479,14 @@ end
         if except~="desync" and batDesyncTpEnabled then stopBatDesyncTp();if batDesyncTpSetVisual then batDesyncTpSetVisual(false) end;if mobBtnRefs.batDesyncTp then mobBtnRefs.batDesyncTp(false) end end
     end
     local defs={
-        {id="drop",label="DROP BR",groupLabel="DROP BR",row=1,col=1,x=.95,y=.55,action=function() runDrop() end},
-        {id="autoLeft",label="AUTO LEFT",groupLabel="AUTO LEFT",row=1,col=2,x=.84,y=.55,state=function() return autoLeftEnabled end,action=function() if autoLeftEnabled then autoLeftEnabled=false;stopAutoLeft() else if _GACC.safeBlocked() then return end;stopOtherMovement("left");autoLeftEnabled=true;startAutoLeft() end;if autoLeftSetVisual then autoLeftSetVisual(autoLeftEnabled) end end},
-        {id="aimbot",label="AIMBOT",groupLabel="AIMBOT",row=2,col=1,x=.73,y=.67,state=function() return autoBatEnabled end,action=function() if autoBatEnabled then stopBatAimbot() else if _GACC.safeBlocked() then return end;stopOtherMovement("aimbot");startBatAimbot() end;if autoBatSetVisual then autoBatSetVisual(autoBatEnabled) end end},
-        {id="autoRight",label="AUTO RIGHT",groupLabel="AUTO RIGHT",row=2,col=2,x=.84,y=.67,state=function() return autoRightEnabled end,action=function() if autoRightEnabled then autoRightEnabled=false;stopAutoRight() else if _GACC.safeBlocked() then return end;stopOtherMovement("right");autoRightEnabled=true;startAutoRight() end;if autoRightSetVisual then autoRightSetVisual(autoRightEnabled) end end},
-        {id="desync",label="TP BAT",groupLabel="TP BAT",row=3,col=1,x=.73,y=.79,state=function() return batDesyncTpEnabled end,action=function() if batDesyncTpEnabled then stopBatDesyncTp() else if _GACC.safeBlocked() then return end;stopOtherMovement("desync");startBatDesyncTp() end;if batDesyncTpSetVisual then batDesyncTpSetVisual(batDesyncTpEnabled) end end},
-        {id="tpDown",label="TP DOWN",groupLabel="TP DOWN",row=3,col=2,x=.84,y=.79,action=function() runTPFloor() end},
-        {id="carry",label="CARRY SPEED",groupLabel="CARRY SPEED",row=4,col=1,x=.95,y=.79,state=function() return carrySpeedActive end,action=function() toggleCarryMode();if _GACC.safeCarryVisual then _GACC.safeCarryVisual(carrySpeedActive) end end},
-        {id="laggerCarry",label="LAGGER CARRY",groupLabel="LAGGER CARRY",row=4,col=2,x=.84,y=.91,state=function() return laggerCarryActive end,action=function()
+        {id="drop",label="DROP BR",groupLabel="DROP BR",row=1,col=1,x=.94,y=.18,action=function() runDrop() end},
+        {id="autoLeft",label="AUTO LEFT",groupLabel="AUTO LEFT",row=1,col=2,x=.94,y=.27,state=function() return autoLeftEnabled end,action=function() if autoLeftEnabled then autoLeftEnabled=false;stopAutoLeft() else if _GACC.safeBlocked() then return end;stopOtherMovement("left");autoLeftEnabled=true;startAutoLeft() end;if autoLeftSetVisual then autoLeftSetVisual(autoLeftEnabled) end end},
+        {id="aimbot",label="AIMBOT",groupLabel="AIMBOT",row=2,col=1,x=.94,y=.36,state=function() return autoBatEnabled end,action=function() if autoBatEnabled then stopBatAimbot() else if _GACC.safeBlocked() then return end;stopOtherMovement("aimbot");startBatAimbot() end;if autoBatSetVisual then autoBatSetVisual(autoBatEnabled) end end},
+        {id="autoRight",label="AUTO RIGHT",groupLabel="AUTO RIGHT",row=2,col=2,x=.94,y=.45,state=function() return autoRightEnabled end,action=function() if autoRightEnabled then autoRightEnabled=false;stopAutoRight() else if _GACC.safeBlocked() then return end;stopOtherMovement("right");autoRightEnabled=true;startAutoRight() end;if autoRightSetVisual then autoRightSetVisual(autoRightEnabled) end end},
+        {id="desync",label="TP BAT",groupLabel="TP BAT",row=3,col=1,x=.94,y=.54,state=function() return batDesyncTpEnabled end,action=function() if batDesyncTpEnabled then stopBatDesyncTp() else if _GACC.safeBlocked() then return end;stopOtherMovement("desync");startBatDesyncTp() end;if batDesyncTpSetVisual then batDesyncTpSetVisual(batDesyncTpEnabled) end end},
+        {id="tpDown",label="TP DOWN",groupLabel="TP DOWN",row=3,col=2,x=.94,y=.63,action=function() runTPFloor() end},
+        {id="carry",label="CARRY SPEED",groupLabel="CARRY SPEED",row=4,col=1,x=.94,y=.72,state=function() return carrySpeedActive end,action=function() toggleCarryMode();if _GACC.safeCarryVisual then _GACC.safeCarryVisual(carrySpeedActive) end end},
+        {id="laggerCarry",label="LAGGER CARRY",groupLabel="LAGGER CARRY",row=4,col=2,x=.94,y=.81,state=function() return laggerCarryActive end,action=function()
             laggerCarryActive = not laggerCarryActive
             if laggerCarryActive then
                 laggerModeEnabled=false
@@ -4493,7 +4500,7 @@ end
             if refreshSpeedModeLabel then refreshSpeedModeLabel() end
             saveConfig()
         end},
-        {id="lagger",label="LAGGER NORMAL",groupLabel="LAGGER NORMAL",row=5,col=1,x=.95,y=.91,state=function() return laggerModeEnabled end,action=function()
+        {id="lagger",label="LAGGER NORMAL",groupLabel="LAGGER NORMAL",row=5,col=1,x=.94,y=.90,state=function() return laggerModeEnabled end,action=function()
             if not laggerModeEnabled then laggerCarryActive=false end
             toggleLaggerMode()
             if laggerModeEnabled then laggerCarryActive=false end
@@ -4504,11 +4511,11 @@ end
     }
     local specRefs={}
     local function makeButton(spec)
-        local btn=Instance.new("TextButton",mobileGui);btn.Name="Mobile_"..spec.id;btn.AnchorPoint=Vector2.new(.5,.5);btn.Size=UDim2.fromOffset(mobileButtonsSize,mobileButtonsSize);btn.BackgroundColor3=Color3.fromRGB(255,255,255);btn.BackgroundTransparency=.05;btn.BorderSizePixel=0;btn.Text=spec.label;btn.TextColor3=Color3.fromRGB(255,0,0);btn.Font=Enum.Font.GothamBlack;btn.TextSize=math.clamp(math.floor(mobileButtonsSize*.18),9,16);btn.TextWrapped=true;btn.AutoButtonColor=false;btn.ClipsDescendants=true;btn.ZIndex=5;Instance.new("UICorner",btn).CornerRadius=UDim.new(0,12)
+        local btn=Instance.new("TextButton",mobileGui);btn.Name="Mobile_"..spec.id;btn.AnchorPoint=Vector2.new(.5,.5);btn.Size=UDim2.fromOffset(mobileButtonsSize,mobileButtonsSize);btn.BackgroundColor3=Color3.fromRGB(255,255,255);btn.BackgroundTransparency=.05;btn.BorderSizePixel=0;btn.Text=spec.label;btn.TextColor3=Color3.fromRGB(255,0,0);btn.Font=Enum.Font.GothamBlack;btn.TextSize=math.clamp(math.floor(mobileButtonsSize*.18),9,16);btn.TextWrapped=true;btn.AutoButtonColor=false;btn.ClipsDescendants=true;btn.ZIndex=5;Instance.new("UICorner",btn).CornerRadius=UDim.new(0,9)
         buttonRefs[spec.id]=btn;specRefs[spec.id]=spec
         local stroke=Instance.new("UIStroke",btn);stroke.Color=Color3.fromRGB(92,96,110);stroke.Thickness=1;stroke.Transparency=.18
         local pressScale=Instance.new("UIScale",btn);pressScale.Scale=1
-        local editDot=Instance.new("Frame",btn);editDot.AnchorPoint=Vector2.new(.5,.5);editDot.Position=UDim2.new(1,-7,0,7);editDot.Size=UDim2.fromOffset(6,6);editDot.BorderSizePixel=0;editDot.ZIndex=7;Instance.new("UICorner",editDot).CornerRadius=UDim.new(1,0)
+        local editDot=Instance.new("Frame",btn);editDot.AnchorPoint=Vector2.new(.5,.5);editDot.Position=UDim2.new(1,-5,0,5);editDot.Size=UDim2.fromOffset(4,4);editDot.BorderSizePixel=0;editDot.ZIndex=7;Instance.new("UICorner",editDot).CornerRadius=UDim.new(1,0)
         local saved=_GACC.mobileButtonPositions[spec.id]
         local px=(type(saved)=="table" and tonumber(saved.x)) or spec.x;local py=(type(saved)=="table" and tonumber(saved.y)) or spec.y
         btn.Position=UDim2.fromScale(math.clamp(px,.04,.96),math.clamp(py,.08,.94))
@@ -4584,7 +4591,10 @@ end
                 button.Parent=mobileGui
                 button.AnchorPoint=Vector2.new(.5,.5)
                 local saved=_GACC.mobileButtonPositions[id]
-                local px=(type(saved)=="table" and tonumber(saved.x)) or spec.x;local py=(type(saved)=="table" and tonumber(saved.y)) or spec.y
+                local savedX=(type(saved)=="table" and tonumber(saved.x)) or nil
+                local savedY=(type(saved)=="table" and tonumber(saved.y)) or nil
+                local px=(savedX and savedX>=.80) and savedX or spec.x
+                local py=savedY or spec.y
                 button.Position=UDim2.fromScale(math.clamp(px,.04,.96),math.clamp(py,.08,.94))
                 button.Text=spec.label
             end
@@ -4610,7 +4620,7 @@ end
     end
     _GACC.refreshMobileGroup=applyMobileLayout
     _GACC.refreshMobileSize=function()
-        mobileButtonsSize=math.clamp(math.floor(mobileButtonsSize+.5),44,110)
+        mobileButtonsSize=math.clamp(math.floor(mobileButtonsSize+.5),38,110)
         for _,button in pairs(buttonRefs) do
             button.Size=UDim2.fromOffset(mobileButtonsSize,mobileButtonsSize)
             button.TextSize=math.clamp(math.floor(mobileButtonsSize*.18),9,16)
